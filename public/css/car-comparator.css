@@ -40,7 +40,36 @@ body {
 }
 
 .selector-container {
-    margin: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.selector__label {
+    color: var(--text-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-select {
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.form-select:disabled {
+    background-color: #1a1a1a;
+    color: #cccccc;
+    opacity: 0.8;
+    cursor: not-allowed;
+    border-color: #383838;
+}
+
+.form-select:disabled option {
+    color: #cccccc;
+}
+
+/* Override Bootstrap's default styling for disabled selects */
+.form-select:disabled::placeholder {
+    color: #cccccc;
 }
 
 .car-selector {
