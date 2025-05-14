@@ -31,7 +31,7 @@
                     @if($key < count($autos) - 1) vs @endif
                 @endforeach
             </h1>
-            <p class="text-center">Comparación de las características técnicas, de equipamiento, seguridad y precios de 
+            <p class="text-center">Comparación de las características técnicas, de equipamiento y precios de 
                 @foreach($autos as $key => $auto)
                     {{ $auto->marca }} {{ $auto->modelo }}
                     @if($key < count($autos) - 1) {{ $key == count($autos) - 2 ? ' y ' : ', ' }} @endif
@@ -50,20 +50,20 @@
                     <img src="{{ asset('storage/uploads/placeholder-auto.png') }}" alt="{{ $auto->marca }} {{ $auto->modelo }}" class="car__image">
                     <h3 class="car__title">{{ $auto->marca }} {{ $auto->modelo }}</h3>
                     <p class="car__subtitle">{{ $auto->version }}</p>
-                    <div class="car__price">${{ rand(300000, 900000) }}</div>
+                    <div class="car__price">${{ number_format($auto->price, 0, '.', ',') }}</div>
                 </div>
             </div>
             @endforeach
         </div>
 
-        <!-- Fabricado en -->
+        <!-- Información general -->
         <div class="comparison__section">
-            <h2 class="comparison__title">Fabricación</h2>
+            <h2 class="comparison__title">Información general</h2>
             <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Fabricado en</h3>
+                <h3 class="comparison__feature-header">Año</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{{ ['Japón', 'Gran Bretaña', 'Italia', 'Alemania', 'Estados Unidos'][rand(0, 4)] }}</div>
+                        <div class="comparison__feature-value">{{ $auto->year }}</div>
                     @endforeach
                 </div>
             </div>
@@ -86,7 +86,7 @@
                 <h3 class="comparison__feature-header">Cilindrada</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{{ $auto->motor->cilindrada * 1000 }} cc</div>
+                        <div class="comparison__feature-value">{{ $auto->motor->cilindrada }} L</div>
                     @endforeach
                 </div>
             </div>
@@ -96,7 +96,7 @@
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
                         <div class="comparison__feature-value">
-                            {{ $auto->motor->potencia }} hp/rpm
+                            {{ $auto->motor->potencia }} hp
                         </div>
                     @endforeach
                 </div>
@@ -107,7 +107,7 @@
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
                         <div class="comparison__feature-value">
-                            {{ $auto->motor->torque }} lb-pie/rpm
+                            {{ $auto->motor->torque }} lb-pie
                         </div>
                     @endforeach
                 </div>
@@ -117,7 +117,7 @@
                 <h3 class="comparison__feature-header">Cilindros</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{{ $auto->motor->cilindros }} en línea</div>
+                        <div class="comparison__feature-value">{{ $auto->motor->cilindros }}</div>
                     @endforeach
                 </div>
             </div>
@@ -130,6 +130,17 @@
                     @endforeach
                 </div>
             </div>
+
+            @if(isset($autos[0]->motor->valvulas))
+            <div class="comparison__feature">
+                <h3 class="comparison__feature-header">Válvulas</h3>
+                <div class="comparison__feature-values">
+                    @foreach($autos as $auto)
+                        <div class="comparison__feature-value">{{ $auto->motor->valvulas }}</div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Transmisión -->
@@ -214,6 +225,15 @@
             </div>
             
             <div class="comparison__feature">
+                <h3 class="comparison__feature-header">Capacidad de carga (L)</h3>
+                <div class="comparison__feature-values">
+                    @foreach($autos as $auto)
+                        <div class="comparison__feature-value">{{ $auto->dimension->capacidad_carga }}</div>
+                    @endforeach
+                </div>
+            </div>
+            
+            <div class="comparison__feature">
                 <h3 class="comparison__feature-header">Capacidad de tanque (L)</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
@@ -223,204 +243,76 @@
             </div>
             
             <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Capacidad de cajuela (L)</h3>
+                <h3 class="comparison__feature-header">Puertas</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">
-                            {{ $auto->dimension->capacidad_cajuela }}
-                        </div>
+                        <div class="comparison__feature-value">{{ $auto->dimension->puertas }}</div>
+                    @endforeach
+                </div>
+            </div>
+            
+            <div class="comparison__feature">
+                <h3 class="comparison__feature-header">Asientos</h3>
+                <div class="comparison__feature-values">
+                    @foreach($autos as $auto)
+                        <div class="comparison__feature-value">{{ $auto->dimension->asientos }}</div>
                     @endforeach
                 </div>
             </div>
         </div>
 
-        <!-- Seguridad -->
+        <!-- Rendimiento -->
+        @if(isset($autos[0]->rendimiento))
         <div class="comparison__section">
-            <h2 class="comparison__title">Seguridad</h2>
+            <h2 class="comparison__title">Rendimiento</h2>
             
             <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Airbags</h3>
+                <h3 class="comparison__feature-header">Ciudad (L/100km)</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">
-                            {{ $auto->seguridad->airbags }}
-                        </div>
+                        <div class="comparison__feature-value">{{ $auto->rendimiento->ciudad }}</div>
                     @endforeach
                 </div>
             </div>
             
             <div class="comparison__feature">
-                <h3 class="comparison__feature-header">ABS</h3>
+                <h3 class="comparison__feature-header">Carretera (L/100km)</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->seguridad->abs ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
+                        <div class="comparison__feature-value">{{ $auto->rendimiento->carretera }}</div>
                     @endforeach
                 </div>
             </div>
             
             <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Control de Tracción</h3>
+                <h3 class="comparison__feature-header">Combinado (L/100km)</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->seguridad->control_traccion ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
+                        <div class="comparison__feature-value">{{ $auto->rendimiento->combinado }}</div>
                     @endforeach
                 </div>
             </div>
             
             <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Control de Estabilidad</h3>
+                <h3 class="comparison__feature-header">Autonomía (km)</h3>
                 <div class="comparison__feature-values">
                     @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->seguridad->control_estabilidad ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Asistente de Frenado</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->seguridad->asistente_frenado ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Cámara de Reversa</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->seguridad->camara_reversa ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
+                        <div class="comparison__feature-value">{{ $auto->rendimiento->autonomia }}</div>
                     @endforeach
                 </div>
             </div>
         </div>
+        @endif
 
-        <!-- Confort -->
-        <div class="comparison__section">
-            <h2 class="comparison__title">Confort</h2>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Aire Acondicionado</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->confort->aire_acondicionado ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Climatizador</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->confort->climatizador ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Asientos Calefactables</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->confort->asientos_calefactables ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Asientos Eléctricos</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->confort->asientos_electricos ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Techo Solar</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->confort->techo_solar ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Entretenimiento -->
-        <div class="comparison__section">
-            <h2 class="comparison__title">Entretenimiento</h2>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Sistema de Infotenimiento</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{{ $auto->entretenimiento->sistema_infotainment }}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Pantalla Principal (pulgadas)</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">
-                            {{ $auto->entretenimiento->pantalla_principal }}"
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Sistema de Sonido</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{{ $auto->entretenimiento->sistema_sonido }}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Número de Parlantes</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">
-                            {{ $auto->entretenimiento->numero_parlantes }}
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Bluetooth</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->entretenimiento->bluetooth ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Android Auto</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->entretenimiento->android_auto ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
-            
-            <div class="comparison__feature">
-                <h3 class="comparison__feature-header">Apple CarPlay</h3>
-                <div class="comparison__feature-values">
-                    @foreach($autos as $auto)
-                        <div class="comparison__feature-value">{!! $auto->entretenimiento->apple_carplay ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                    @endforeach
-                </div>
-            </div>
+        <!-- Volver al comparador -->
+        <div class="text-center mt-5 mb-4">
+            <a href="{{ route('comparador') }}" class="btn btn-primary">Volver al comparador</a>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
+    <footer class="py-4 footer">
+        <div class="container text-center">
             <p class="mb-0">CarWizard © 2025 - Todos los derechos reservados</p>
         </div>
     </footer>

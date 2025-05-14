@@ -50,7 +50,7 @@
                     <select class="form-select car-selector marca-select" data-car-position="1">
                         <option value="">Seleccionar marca...</option>
                         @foreach($marcas as $marca)
-                            <option value="{{ $marca }}">{{ $marca }}</option>
+                            <option value="{{ $marca->PK_id }}">{{ $marca->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -184,7 +184,7 @@
                                 let modeloSelect = $('.modelo-select');
                                 modeloSelect.empty().append('<option value="">Seleccionar modelo...</option>');
                                 modelos.forEach(function(modelo) {
-                                    modeloSelect.append(`<option value="${modelo}">${modelo}</option>`);
+                                    modeloSelect.append(`<option value="${modelo.PK_name}">${modelo.PK_name}</option>`);
                                 });
                                 modeloSelect.prop('disabled', false);
                                 $('.version-select').prop('disabled', true).empty().append('<option value="">Seleccionar versión...</option>');
@@ -202,15 +202,12 @@
                         $.ajax({
                             url: '{{ route("getVersiones") }}',
                             method: 'POST',
-                            data: { 
-                                marca: marca,
-                                modelo: modelo 
-                            },
+                            data: { marca: marca, modelo: modelo },
                             success: function(versiones) {
                                 let versionSelect = $('.version-select');
                                 versionSelect.empty().append('<option value="">Seleccionar versión...</option>');
                                 versiones.forEach(function(version) {
-                                    versionSelect.append(`<option value="${version.id}">${version.version}</option>`);
+                                    versionSelect.append(`<option value="${version.PK_id}">${version.version}</option>`);
                                 });
                                 versionSelect.prop('disabled', false);
                             }
@@ -220,136 +217,54 @@
 
                 // Evento cambio de versión
                 $('.version-select').change(function() {
-                    const autoId = $(this).val();
+                    const auto_id = $(this).val();
+                    const carPosition = $(this).data('car-position');
                     
-                    if (autoId) {
+                    if (auto_id) {
                         $.ajax({
                             url: '{{ route("getAutoDetalle") }}',
                             method: 'POST',
-                            data: { auto_id: autoId },
+                            data: { auto_id: auto_id },
                             success: function(auto) {
-                                selectedCars[currentPosition] = auto;
-                                updateCarCard(auto, currentPosition);
-                                checkCompareButton();
+                                // Guardar el auto seleccionado
+                                selectedCars[carPosition] = auto;
+                                
+                                // Actualizar la card
+                                $(`#car-card-${carPosition} .car-title`).text(`${auto.marca} ${auto.modelo}`);
+                                $(`#car-card-${carPosition} .car-subtitle`).text(auto.version);
+                                
+                                // Habilitar botón de comparación si hay al menos 2 autos
+                                if (Object.keys(selectedCars).length >= 2) {
+                                    $('#compare-btn').prop('disabled', false);
+                                }
+                                
+                                // Activar la siguiente posición
                                 activateNextPosition();
                             }
                         });
                     }
                 });
-            }
 
-            function updateCarCard(auto, position) {
-                const card = $(`#car-card-${position}`);
-                card.find('.car-title').text(`${auto.marca} ${auto.modelo}`);
-                card.find('.car-subtitle').text(auto.version);
-            }
-
-            function checkCompareButton() {
-                const selectedCount = Object.keys(selectedCars).length;
-                $('#compare-btn').prop('disabled', selectedCount < 2);
-            }
-
-            $('#compare-btn').click(function() {
-                if (Object.keys(selectedCars).length >= 2) {
-                    const autoIds = Object.values(selectedCars).map(car => car.id);
+                // Evento clic en el botón de comparar
+                $('#compare-btn').click(function() {
+                    const selectedAutoIds = Object.values(selectedCars).map(auto => auto.id);
                     
-                    // Crear un formulario temporal para hacer el POST
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '{{ route("comparacionDetallada") }}';
-                    
-                    // Agregar el token CSRF
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = $('meta[name="csrf-token"]').attr('content');
-                    form.appendChild(csrfToken);
-                    
-                    // Agregar los IDs de los autos
-                    autoIds.forEach(id => {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'autos[]';
-                        input.value = id;
-                        form.appendChild(input);
+                    // Redirigir a la página de comparación detallada
+                    $.ajax({
+                        url: '{{ route("comparacionDetallada") }}',
+                        method: 'POST',
+                        data: { autos: selectedAutoIds },
+                        success: function(response) {
+                            // Usa document.write para reemplazar la página completa
+                            document.open();
+                            document.write(response);
+                            document.close();
+                        }
                     });
-                    
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-
-            function showComparison(cars) {
-                let comparisonHtml = `
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Característica</th>
-                                ${Object.values(cars).map(car => `<th>${car.marca} ${car.modelo} ${car.version}</th>`).join('')}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="${Object.keys(cars).length + 1}" class="table-primary"><strong>Motor</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Tipo</td>
-                                ${Object.values(cars).map(car => `<td>${car.motor.tipo}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Cilindros</td>
-                                ${Object.values(cars).map(car => `<td>${car.motor.cilindros}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Potencia (HP)</td>
-                                ${Object.values(cars).map(car => `<td>${car.motor.potencia}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Torque (lb-ft)</td>
-                                ${Object.values(cars).map(car => `<td>${car.motor.torque}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td colspan="${Object.keys(cars).length + 1}" class="table-primary"><strong>Transmisión</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Tipo</td>
-                                ${Object.values(cars).map(car => `<td>${car.transmision.tipo}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Tracción</td>
-                                ${Object.values(cars).map(car => `<td>${car.transmision.traccion}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td colspan="${Object.keys(cars).length + 1}" class="table-primary"><strong>Dimensiones</strong></td>
-                            </tr>
-                            <tr>
-                                <td>Largo (mm)</td>
-                                ${Object.values(cars).map(car => `<td>${car.dimension.largo}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Ancho (mm)</td>
-                                ${Object.values(cars).map(car => `<td>${car.dimension.ancho}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Alto (mm)</td>
-                                ${Object.values(cars).map(car => `<td>${car.dimension.alto}</td>`).join('')}
-                            </tr>
-                            <tr>
-                                <td>Peso (kg)</td>
-                                ${Object.values(cars).map(car => `<td>${car.dimension.peso}</td>`).join('')}
-                            </tr>
-                        </tbody>
-                    </table>
-                `;
-
-                $('#comparison-table').html(comparisonHtml).show();
-                // Scroll to comparison table
-                $('html, body').animate({
-                    scrollTop: $("#comparison-table").offset().top
-                }, 1000);
+                });
             }
 
-            // Inicializar los event listeners
+            // Inicializar event listeners
             attachEventListeners();
         });
     </script>

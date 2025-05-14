@@ -12,7 +12,18 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            AutoSeeder::class,
+            // Primero los seeders independientes
+            MakeSeeder::class,
+            ModelSeeder::class,
+            YearSeeder::class,
+            EngineSeeder::class,
+            BodySeeder::class,
+            MileageSeeder::class,
+            
+            // Luego los seeders que dependen de los anteriores
+            MakeModelSeeder::class,
+            TrimSeeder::class,
+            
         ]);
     }
 }
